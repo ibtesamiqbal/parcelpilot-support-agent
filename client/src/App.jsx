@@ -31,7 +31,7 @@ export function App() {
         <div className="brand">
           <div className="brand-logo">📦</div>
           <div>
-            <div className="brand-title">ParcelPilot <span className="brand-badge">PRO</span></div>
+            <div className="brand-title">ParcelPilot Support Agent</div>
             <div className="brand-subtitle">
               Snapshot Reference: 2026-08-16 11:00 Asia/Kolkata
             </div>

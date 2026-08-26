@@ -78,21 +78,20 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
   const toolCalls = [];
   const lowerMsg = message.trim().toLowerCase();
 
-  // 1. Conversational Greetings & Capability Inquiries
+  // 1. Conversational Greetings & General Intent Handling
   const isGreeting = /^hi\b|^hello\b|^hey\b|^greetings\b/i.test(lowerMsg);
-  const isWhoAreYou = lowerMsg.includes('who are you') || lowerMsg.includes('your name');
+  const isWhoAreYou = lowerMsg.includes('who are you') || lowerMsg.includes('your name') || lowerMsg === 'who';
   const isWhatCanYouDo = lowerMsg.includes('what can you do') || lowerMsg.includes('what you can do') || lowerMsg.includes('help');
-  const isCasualChitchat = lowerMsg.includes('mental') || lowerMsg.includes('really') || lowerMsg.includes('what ?') || lowerMsg === 'what' || lowerMsg === 'hi';
+  const isCasualChitchat = lowerMsg.includes('mental') || lowerMsg.includes('really') || lowerMsg.includes('what ?') || lowerMsg === 'what' || lowerMsg === 'hi' || lowerMsg === '?';
 
   if (isGreeting || isWhoAreYou || isWhatCanYouDo || isCasualChitchat) {
     const acc = getAccountById(accountId);
     return {
       reply: `Hello! I am ParcelPilot's AI Support Assistant for **${acc?.account_name || accountId}** (${acc?.plan || 'Standard'} Plan).\n\n` +
-             `I can assist you with:\n` +
-             `- 📜 **Contract Overrides & Cancellation Terms** (e.g. fee waivers for BOOKED shipments)\n` +
-             `- 📦 **Order Lookups & Delayed Pickup Credit Eligibility** (e.g. ORD-1001, ORD-2002)\n` +
-             `- ⚡ **Ticket Escalations** (with explicit confirmation before executing)\n\n` +
-             `Feel free to ask any question or try one of the quick prompt chips above!`,
+             `How can I assist you today? You can ask me to:\n` +
+             `- Check order status or delayed pickup details (e.g. \`ORD-1001\`)\n` +
+             `- Verify cancellation terms and service credit eligibility under your contract\n` +
+             `- Escalate an issue to our support operations team`,
       toolCalls: []
     };
   }
@@ -191,11 +190,8 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
 
   const acc = getAccountById(accountId);
   return {
-    reply: `I couldn't find a direct policy document matching "${message}" for ${acc?.account_name || accountId}.\n\n` +
-           `You can ask me about:\n` +
-           `- Order statuses (e.g., \`ORD-1001\`, \`ORD-1002\`)\n` +
-           `- Contract cancellation terms or delayed pickup service credits\n` +
-           `- Escalating an open issue to customer support`,
+    reply: `I couldn't find a specific policy document for "${message}". ` +
+           `Please ask about an order (e.g., \`ORD-1001\`), contract terms, or ticket escalations for **${acc?.account_name || accountId}**.`,
     toolCalls: []
   };
 }
