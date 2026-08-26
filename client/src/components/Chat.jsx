@@ -115,13 +115,27 @@ export function Chat({ accountId, accountName, accountPlan }) {
           </div>
         ))}
 
+        {messages.length === 1 && (
+          <div className="chat-empty-welcome">
+            <div className="welcome-avatar">📦</div>
+            <h3>ParcelPilot Support Assistant</h3>
+            <p>Connected to <strong>{accountName}</strong> ({accountPlan || 'Standard'} Plan)</p>
+            <div className="suggested-topics">
+              <span className="topic-tag">📜 Cancellation Rules</span>
+              <span className="topic-tag">📦 Order Status (ORD-1001)</span>
+              <span className="topic-tag">🚚 Service Credit Math</span>
+              <span className="topic-tag">⚡ Issue Escalation</span>
+            </div>
+          </div>
+        )}
+
         {loading && (
           <div className="message-wrapper assistant">
             <div className="bubble loading-bubble">
               <div className="typing-dots">
                 <span></span><span></span><span></span>
               </div>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
                 Analyzing contract clauses & order data...
               </span>
             </div>
