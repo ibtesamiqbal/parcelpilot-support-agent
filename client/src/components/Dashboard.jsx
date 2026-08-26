@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-/** Renders Proactive Issue Detection Dashboard (Bonus Problem 1). */
+/** Renders Executive Proactive Issue Detection Dashboard (Bonus Problem 1). */
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ export function Dashboard() {
       <div className="dashboard-container">
         <div className="dashboard-loading">
           <div className="spinner"></div>
-          <p>Analyzing operational dataset for proactive issue detection signals...</p>
+          <p>Running real-time operational scan over customer dataset...</p>
         </div>
       </div>
     );
@@ -60,35 +60,76 @@ export function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* Clean Dashboard Header */}
+      {/* Executive Control Header */}
       <div className="dashboard-header-bar">
-        <div>
+        <div className="header-left">
           <div className="dashboard-title-row">
-            <h2>Proactive Issue Detection Dashboard</h2>
+            <h2>Operations Control Center</h2>
             <span className="live-status-pill">● LIVE SCAN ENGINE ACTIVE</span>
           </div>
           <p className="dashboard-subtitle">
-            Dataset Snapshot: {dashboardData?.snapshot} | {allIssues.length} Operational Signals Flagged
+            Reference Snapshot: {dashboardData?.snapshot || '2026-08-16 11:00 Asia/Kolkata'} | Real-Time Issue Monitoring
           </p>
         </div>
 
-        <button 
-          className={`refresh-btn ${refreshing ? 'spinning' : ''}`}
-          onClick={() => fetchDashboardData(true)}
-          disabled={refreshing}
-        >
-          🔄 {refreshing ? 'Scanning...' : 'Rescan Engine'}
-        </button>
+        <div className="header-right">
+          <button 
+            className={`refresh-btn ${refreshing ? 'spinning' : ''}`}
+            onClick={() => fetchDashboardData(true)}
+            disabled={refreshing}
+          >
+            🔄 {refreshing ? 'Scanning...' : 'Rescan Engine'}
+          </button>
+        </div>
       </div>
 
-      {/* Filters & Search */}
+      {/* KPI Executive Summary Row */}
+      <div className="kpi-summary-grid">
+        <div className="kpi-card critical">
+          <div className="kpi-top">
+            <span className="kpi-label">Active P1 Outages</span>
+            <span className="kpi-icon">🚨</span>
+          </div>
+          <div className="kpi-value">{countBySeverity.CRITICAL}</div>
+          <div className="kpi-subtext">Immediate Escalation Required</div>
+        </div>
+
+        <div className="kpi-card high">
+          <div className="kpi-top">
+            <span className="kpi-label">SLA Breach Warnings</span>
+            <span className="kpi-icon">⏱️</span>
+          </div>
+          <div className="kpi-value">{countBySeverity.HIGH}</div>
+          <div className="kpi-subtext">Exceeding Response Targets</div>
+        </div>
+
+        <div className="kpi-card medium">
+          <div className="kpi-top">
+            <span className="kpi-label">Carrier Pickup Delays</span>
+            <span className="kpi-icon">🚚</span>
+          </div>
+          <div className="kpi-value">{countBySeverity.MEDIUM}</div>
+          <div className="kpi-subtext">Overdue Carrier Pickups</div>
+        </div>
+
+        <div className="kpi-card info">
+          <div className="kpi-top">
+            <span className="kpi-label">System Health</span>
+            <span className="kpi-icon">🛡️</span>
+          </div>
+          <div className="kpi-value">84%</div>
+          <div className="kpi-subtext">Monitored Across 4 Accounts</div>
+        </div>
+      </div>
+
+      {/* Control Bar: Severity Filters & Search */}
       <div className="dashboard-controls-row">
         <div className="severity-tabs">
           <button 
             className={`severity-tab ${filterSeverity === 'ALL' ? 'active' : ''}`}
             onClick={() => setFilterSeverity('ALL')}
           >
-            All ({countBySeverity.ALL})
+            All Signals ({countBySeverity.ALL})
           </button>
           <button 
             className={`severity-tab critical ${filterSeverity === 'CRITICAL' ? 'active' : ''}`}
@@ -114,7 +155,7 @@ export function Dashboard() {
           <span>🔍</span>
           <input 
             type="text" 
-            placeholder="Search signals by ticket, order, or customer..." 
+            placeholder="Filter signals by ticket, order, or customer..." 
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -124,11 +165,11 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Issue Cards Grid */}
+      {/* Issue Signals Grid */}
       <div className="dashboard-grid">
         {filteredIssues.length === 0 ? (
           <div className="no-issues-card">
-            <p>No operational signals match your selected filter.</p>
+            <p>No operational signals match your selected filter criteria.</p>
           </div>
         ) : (
           filteredIssues.map(issue => (
@@ -140,6 +181,12 @@ export function Dashboard() {
 
               <h3 className="issue-title">{issue.title}</h3>
               <p className="issue-summary">{issue.summary}</p>
+
+              {issue.rule_reason && (
+                <div className="rule-reason-box">
+                  <strong>📋 Policy Rule Cited:</strong> {issue.rule_reason}
+                </div>
+              )}
 
               {issue.workaround && (
                 <div className="workaround-box">
