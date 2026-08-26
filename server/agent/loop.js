@@ -76,9 +76,28 @@ export function dispatchToolCall(name, input, accountId) {
 /** Executes deterministic fallback loop when live API key is missing. */
 function runDeterministicFallbackLoop(message, accountId, history = []) {
   const toolCalls = [];
-  const lowerMsg = message.toLowerCase();
+  const lowerMsg = message.trim().toLowerCase();
 
-  // Pattern Match 1: Specific Order Lookup (e.g. ORD-1001, ORD-2001)
+  // Pattern Match 1: Conversational Greetings & General Capability Questions
+  const isGreeting = /^hi\b|^hello\b|^hey\b|^greetings\b/i.test(lowerMsg);
+  const isWhoAreYou = lowerMsg.includes('who are you') || lowerMsg.includes('your name');
+  const isWhatCanYouDo = lowerMsg.includes('what can you do') || lowerMsg.includes('what you can do') || lowerMsg.includes('help');
+  const isCasualChitchat = lowerMsg.includes('mental') || lowerMsg.includes('really') || lowerMsg.includes('what ?') || lowerMsg === 'what' || lowerMsg === 'hi';
+
+  if (isGreeting || isWhoAreYou || isWhatCanYouDo || isCasualChitchat) {
+    const acc = getAccountById(accountId);
+    return {
+      reply: `Hello! I am ParcelPilot's AI Support Assistant for **${acc?.account_name || accountId}** (${acc?.plan || 'Standard'} Plan).\n\n` +
+             `**What I can do for you:**\n` +
+             `- 📜 **Cancellation Policies & Contract Overrides:** Check if your agreement waives cancellation fees or if standard SOP applies.\n` +
+             `- 📦 **Order Status & SLA Math:** Look up order details, verify delayed pickup hours, and check service credit eligibility.\n` +
+             `- ⚡ **Ticket Escalations:** Stage ticket escalations for support team action with your explicit confirmation.\n\n` +
+             `Feel free to click one of the quick prompt chips above or ask about any order (e.g. \`ORD-1001\`) to get started!`,
+      toolCalls: []
+    };
+  }
+
+  // Pattern Match 2: Specific Order Lookup (e.g. ORD-1001, ORD-2001)
   const orderMatch = message.match(/ORD-\d+/i);
   if (orderMatch) {
     const requestedOrderId = orderMatch[0].toUpperCase();
@@ -118,7 +137,7 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
     };
   }
 
-  // Pattern Match 2: Action Escalation request / Confirmation flow
+  // Pattern Match 3: Action Escalation request / Confirmation flow
   if (lowerMsg.includes('escalat') || lowerMsg.includes('confirm') || lowerMsg.includes('yes')) {
     const isConfirmation = lowerMsg === 'yes' || lowerMsg.includes('confirm') || lowerMsg.includes('proceed');
     
@@ -160,7 +179,7 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
     }
   }
 
-  // Fallback document search
+  // Fallback document search for legitimate policy/product questions
   const searchRes = dispatchToolCall('search_documents', { query: message }, accountId);
   toolCalls.push({ tool: 'search_documents', input: { query: message }, result: searchRes });
 
@@ -170,7 +189,7 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
   };
 }
 
-/** Runs Gemini API tool-use loop (using gemini-1.5-flash-latest) or fallback loop. */
+/** Runs Gemini API tool-use loop (using gemini-1.5-flash) or fallback loop. */
 export async function runAgentLoop({ message, accountId, history = [] }) {
   const apiKey = process.env.GEMINI_API_KEY;
   const isRealKey = apiKey && apiKey !== 'mock-key-for-now' && apiKey.length > 10;
