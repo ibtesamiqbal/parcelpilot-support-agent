@@ -1,0 +1,23 @@
+{
+  "name": "parcelpilot-agent",
+  "version": "1.0.0",
+  "description": "ParcelPilot AI Support Agent & Proactive Issue Detection Dashboard",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "ingest": "node scripts/ingest-docs.js",
+    "build": "node scripts/ingest-docs.js && npm --prefix client install && npm --prefix client run build"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.3",
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "lunr": "^2.3.9",
+    "pdf-parse": "^1.1.1",
+    "xlsx": "^0.18.5"
+  }
+}
