@@ -78,7 +78,7 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
   const toolCalls = [];
   const lowerMsg = message.trim().toLowerCase();
 
-  // Pattern Match 1: Conversational Greetings & General Capability Questions
+  // 1. Conversational Greetings & Capability Inquiries
   const isGreeting = /^hi\b|^hello\b|^hey\b|^greetings\b/i.test(lowerMsg);
   const isWhoAreYou = lowerMsg.includes('who are you') || lowerMsg.includes('your name');
   const isWhatCanYouDo = lowerMsg.includes('what can you do') || lowerMsg.includes('what you can do') || lowerMsg.includes('help');
@@ -88,16 +88,16 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
     const acc = getAccountById(accountId);
     return {
       reply: `Hello! I am ParcelPilot's AI Support Assistant for **${acc?.account_name || accountId}** (${acc?.plan || 'Standard'} Plan).\n\n` +
-             `**What I can do for you:**\n` +
-             `- 📜 **Cancellation Policies & Contract Overrides:** Check if your agreement waives cancellation fees or if standard SOP applies.\n` +
-             `- 📦 **Order Status & SLA Math:** Look up order details, verify delayed pickup hours, and check service credit eligibility.\n` +
-             `- ⚡ **Ticket Escalations:** Stage ticket escalations for support team action with your explicit confirmation.\n\n` +
-             `Feel free to click one of the quick prompt chips above or ask about any order (e.g. \`ORD-1001\`) to get started!`,
+             `I can assist you with:\n` +
+             `- 📜 **Contract Overrides & Cancellation Terms** (e.g. fee waivers for BOOKED shipments)\n` +
+             `- 📦 **Order Lookups & Delayed Pickup Credit Eligibility** (e.g. ORD-1001, ORD-2002)\n` +
+             `- ⚡ **Ticket Escalations** (with explicit confirmation before executing)\n\n` +
+             `Feel free to ask any question or try one of the quick prompt chips above!`,
       toolCalls: []
     };
   }
 
-  // Pattern Match 2: Specific Order Lookup (e.g. ORD-1001, ORD-2001)
+  // 2. Specific Order Lookup (e.g. ORD-1001, ORD-2001)
   const orderMatch = message.match(/ORD-\d+/i);
   if (orderMatch) {
     const requestedOrderId = orderMatch[0].toUpperCase();
@@ -137,7 +137,7 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
     };
   }
 
-  // Pattern Match 3: Action Escalation request / Confirmation flow
+  // 3. Action Escalation request / Confirmation flow
   if (lowerMsg.includes('escalat') || lowerMsg.includes('confirm') || lowerMsg.includes('yes')) {
     const isConfirmation = lowerMsg === 'yes' || lowerMsg.includes('confirm') || lowerMsg.includes('proceed');
     
@@ -179,13 +179,24 @@ function runDeterministicFallbackLoop(message, accountId, history = []) {
     }
   }
 
-  // Fallback document search for legitimate policy/product questions
+  // 4. Fallback document search for policy/product questions
   const searchRes = dispatchToolCall('search_documents', { query: message }, accountId);
-  toolCalls.push({ tool: 'search_documents', input: { query: message }, result: searchRes });
+  if (searchRes.found && searchRes.results?.length > 0) {
+    toolCalls.push({ tool: 'search_documents', input: { query: message }, result: searchRes });
+    return {
+      reply: `${searchRes.results[0].text}`,
+      toolCalls
+    };
+  }
 
+  const acc = getAccountById(accountId);
   return {
-    reply: `Here is the relevant guidance found from ParcelPilot documentation:\n\n${searchRes.results?.[0]?.text || 'No specific document found.'}`,
-    toolCalls
+    reply: `I couldn't find a direct policy document matching "${message}" for ${acc?.account_name || accountId}.\n\n` +
+           `You can ask me about:\n` +
+           `- Order statuses (e.g., \`ORD-1001\`, \`ORD-1002\`)\n` +
+           `- Contract cancellation terms or delayed pickup service credits\n` +
+           `- Escalating an open issue to customer support`,
+    toolCalls: []
   };
 }
 
