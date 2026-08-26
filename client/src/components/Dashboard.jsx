@@ -60,18 +60,7 @@ export function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* Top Banner explaining the Proactive Engine */}
-      <div className="proactive-explanation-banner">
-        <div className="banner-icon">⚡</div>
-        <div className="banner-content">
-          <h4>Automated Operational Health Scanner</h4>
-          <p>
-            This engine automatically monitors all customer activity, open orders, and tickets at reference snapshot <strong>{dashboardData?.snapshot || '2026-08-16 11:00 Asia/Kolkata'}</strong>. It proactively surfaces SLA risks, carrier delays, and recurring product bugs <em>before</em> customers submit complaints.
-          </p>
-        </div>
-      </div>
-
-      {/* Dashboard Control Panel Header */}
+      {/* Clean Dashboard Header */}
       <div className="dashboard-header-bar">
         <div>
           <div className="dashboard-title-row">
@@ -92,7 +81,7 @@ export function Dashboard() {
         </button>
       </div>
 
-      {/* Filters and Search Bar */}
+      {/* Filters & Search */}
       <div className="dashboard-controls-row">
         <div className="severity-tabs">
           <button 
@@ -135,7 +124,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Issue Grid */}
+      {/* Issue Cards Grid */}
       <div className="dashboard-grid">
         {filteredIssues.length === 0 ? (
           <div className="no-issues-card">
@@ -151,12 +140,6 @@ export function Dashboard() {
 
               <h3 className="issue-title">{issue.title}</h3>
               <p className="issue-summary">{issue.summary}</p>
-
-              {issue.rule_reason && (
-                <div className="rule-reason-box">
-                  <strong>📋 Audit Rule Cited:</strong> {issue.rule_reason}
-                </div>
-              )}
 
               {issue.workaround && (
                 <div className="workaround-box">

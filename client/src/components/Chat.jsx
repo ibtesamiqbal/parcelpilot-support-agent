@@ -90,29 +90,6 @@ export function Chat({ accountId, accountName, accountPlan }) {
         <div className="scope-notice">🔒 Access Control Active: Data scoped to {accountId}</div>
       </div>
 
-      {/* Categorized Quick Sample Prompts */}
-      <div className="sample-prompts">
-        <span className="prompt-label">Quick Prompts:</span>
-        <button
-          className="prompt-chip contract"
-          onClick={() => handleSend('Can Northstar cancel ORD-1001 without a cancellation fee? Explain why.')}
-        >
-          📜 Cancellation Terms (ORD-1001)
-        </button>
-        <button
-          className="prompt-chip order"
-          onClick={() => handleSend('ORD-2002 pickup was delayed over 4 hours due to carrier fault. Do I get a service credit?')}
-        >
-          📦 Delayed Pickup Credit (ORD-2002)
-        </button>
-        <button
-          className="prompt-chip action"
-          onClick={() => handleSend('Escalate my open ticket TKT-501')}
-        >
-          ⚡ Escalate Ticket (TKT-501)
-        </button>
-      </div>
-
       {/* Messages Feed */}
       <div className="messages-list">
         {messages.map((msg, idx) => (
