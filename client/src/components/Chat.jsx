@@ -2,17 +2,28 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ToolBadge } from './ToolBadge';
 import { ConfirmDialog } from './ConfirmDialog';
 
-export function Chat({ accountId, accountName }) {
+export function Chat({ accountId, accountName, accountPlan }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hello! I am ParcelPilot's support assistant for ${accountName}. How can I assist you with your orders, cancellations, SLAs, or service credits today?`,
+      content: `Hello! I am ParcelPilot's AI Support Assistant for ${accountName} (${accountPlan} Plan). How can I assist you with your orders, cancellations, SLAs, or service credits today?`,
       toolCalls: []
     }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Update greeting when account switches
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: `Hello! Switched context to ${accountName} (${accountId} - ${accountPlan || 'Standard'} Plan). How can I assist you with your account's orders, contract terms, or SLAs today?`,
+        toolCalls: []
+      }
+    ]);
+  }, [accountId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,28 +80,40 @@ export function Chat({ accountId, accountName }) {
 
   return (
     <div className="chat-container">
+      {/* Scope Info Header Bar */}
+      <div className="chat-scope-bar">
+        <div className="scope-info">
+          <span className="scope-indicator">●</span>
+          <span>Active Context: <strong>{accountName}</strong> ({accountId})</span>
+          <span className="scope-badge">{accountPlan || 'Standard'} Plan</span>
+        </div>
+        <div className="scope-notice">🔒 Access Control Active: Data scoped to {accountId}</div>
+      </div>
+
+      {/* Categorized Quick Sample Prompts */}
       <div className="sample-prompts">
-        <span style={{ fontSize: '0.8rem', color: '#94a3b8', alignSelf: 'center' }}>Try asking:</span>
+        <span className="prompt-label">Quick Prompts:</span>
         <button
-          className="prompt-chip"
+          className="prompt-chip contract"
           onClick={() => handleSend('Can Northstar cancel ORD-1001 without a cancellation fee? Explain why.')}
         >
-          Can Northstar cancel ORD-1001 without a fee?
+          📜 Cancellation Terms (ORD-1001)
         </button>
         <button
-          className="prompt-chip"
+          className="prompt-chip order"
           onClick={() => handleSend('ORD-2002 pickup was delayed over 4 hours due to carrier fault. Do I get a service credit?')}
         >
-          ORD-2002 service credit eligibility?
+          📦 Delayed Pickup Credit (ORD-2002)
         </button>
         <button
-          className="prompt-chip"
+          className="prompt-chip action"
           onClick={() => handleSend('Escalate my open ticket TKT-501')}
         >
-          Escalate open ticket TKT-501
+          ⚡ Escalate Ticket (TKT-501)
         </button>
       </div>
 
+      {/* Messages Feed */}
       <div className="messages-list">
         {messages.map((msg, idx) => (
           <div key={idx} className={`message-wrapper ${msg.role}`}>
@@ -103,7 +126,7 @@ export function Chat({ accountId, accountName }) {
             )}
 
             <div className="bubble">
-              {msg.content}
+              <div className="bubble-content">{msg.content}</div>
 
               {msg.role === 'assistant' && msg.pendingConfirmation && (
                 <ConfirmDialog
@@ -117,14 +140,20 @@ export function Chat({ accountId, accountName }) {
 
         {loading && (
           <div className="message-wrapper assistant">
-            <div className="bubble" style={{ fontStyle: 'italic', color: '#94a3b8' }}>
-              ParcelPilot assistant is looking up documents & order data...
+            <div className="bubble loading-bubble">
+              <div className="typing-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Analyzing contract clauses & order data...
+              </span>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input Bar */}
       <div className="input-bar">
         <input
           type="text"
@@ -133,8 +162,9 @@ export function Chat({ accountId, accountName }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
         />
-        <button onClick={() => handleSend()} disabled={loading}>
-          Send
+        <button className="send-btn" onClick={() => handleSend()} disabled={loading}>
+          <span>Send</span>
+          <span className="send-icon">➔</span>
         </button>
       </div>
     </div>

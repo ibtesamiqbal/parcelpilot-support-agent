@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chat } from './components/Chat';
 import { Dashboard } from './components/Dashboard';
+import { AccountSelector } from './components/AccountSelector';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('chat');
@@ -20,60 +21,60 @@ export function App() {
 
   const selectedAccount = accounts.find(a => a.account_id === selectedAccountId) || {
     account_id: 'ACCT-001',
-    account_name: 'Northstar Logistics'
+    account_name: 'Northstar Logistics',
+    plan: 'Enterprise'
   };
 
   return (
-    <>
+    <div className="app-shell">
       <header className="header">
         <div className="brand">
-          <span className="brand-icon">📦</span>
+          <div className="brand-logo">📦</div>
           <div>
-            <div className="brand-title">ParcelPilot Support Agent</div>
-            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-              Dataset Snapshot: 2026-08-16 11:00 Asia/Kolkata
+            <div className="brand-title">ParcelPilot <span className="brand-badge">PRO</span></div>
+            <div className="brand-subtitle">
+              Snapshot Reference: 2026-08-16 11:00 Asia/Kolkata
             </div>
           </div>
         </div>
 
-        <div className="nav-tabs">
+        <nav className="nav-tabs">
           <button
             className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`}
             onClick={() => setActiveTab('chat')}
           >
-            💬 Support Chat
+            <span className="tab-icon">💬</span>
+            <span>Support Chat</span>
           </button>
           <button
             className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveTab('dashboard')}
           >
-            📊 Issue Detection Dashboard
+            <span className="tab-icon">⚡</span>
+            <span>Issue Detection Engine</span>
+            <span className="live-pulse"></span>
           </button>
-        </div>
+        </nav>
 
-        <div className="user-selector">
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Log in as:</span>
-          <select
-            value={selectedAccountId}
-            onChange={e => setSelectedAccountId(e.target.value)}
-          >
-            {accounts.map(acc => (
-              <option key={acc.account_id} value={acc.account_id}>
-                {acc.account_name} ({acc.account_id} - {acc.plan})
-              </option>
-            ))}
-          </select>
-        </div>
+        <AccountSelector
+          accounts={accounts}
+          selectedAccountId={selectedAccountId}
+          onSelectAccount={setSelectedAccountId}
+        />
       </header>
 
       <main className="main-content">
         {activeTab === 'chat' ? (
-          <Chat accountId={selectedAccountId} accountName={selectedAccount.account_name} />
+          <Chat 
+            accountId={selectedAccountId} 
+            accountName={selectedAccount.account_name} 
+            accountPlan={selectedAccount.plan}
+          />
         ) : (
           <Dashboard />
         )}
       </main>
-    </>
+    </div>
   );
 }
 
