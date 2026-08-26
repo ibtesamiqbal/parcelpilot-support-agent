@@ -180,8 +180,8 @@ body {
 }
 
 .account-select option {
-  background-color: #0f172a;
-  color: #f8fafc;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
   padding: 8px;
 }
 
